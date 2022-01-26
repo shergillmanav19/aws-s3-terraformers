@@ -2,6 +2,7 @@ require("dotenv").config();
 const fs = require("fs");
 const S3 = require("aws-sdk/clients/s3");
 const sharp = require("sharp");
+
 const bucketName = process.env.AWS_BUCKET_NAME;
 const region = process.env.AWS_BUCKET_REGION;
 const accessKeyId = process.env.AWS_ACCESS_KEY;
@@ -24,13 +25,12 @@ async function ShrinkSize(path, imageFit = "fill", width = 235, height = 320) {
 }
 // uploads a file to s3
 function uploadFile(key, res) {
-  //   const fileStream = fs.createReadStream("out.png");
-  // Body: res.body,
 
   const uploadParams = {
     Bucket: bucketName,
     Body: res,
     Key: key,
+    ContentType: "video/mp4"
   };
   return s3.upload(uploadParams).promise();
 }

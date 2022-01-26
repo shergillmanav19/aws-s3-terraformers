@@ -1,63 +1,68 @@
-const fetch = (...args) =>
-  import("node-fetch").then(({ default: fetch }) => fetch(...args));
 const express = require("express");
 const fs = require("fs");
 const util = require("util");
 const sharp = require("sharp");
 const axios = require("axios");
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffmpeg = require('fluent-ffmpeg');
+ffmpeg.setFfmpegPath(ffmpegPath);
 // const upload = multer({ dest: "uploads/" });
 const { uploadFile, getFileStream } = require("./s3");
 const app = express();
 
-app.get("/images/:key", async (req, res) => {
-  console.log(req.params);
-  const key = req.params.key;
+app.post("/uploadtos3", async (req, res) => {
+  console.log(req.query);
+  const key = req.query.key;
+  const type = req.query.type;
 
-  try {
-    const imageResponse = await axios({
-      url: `https://ipfs.io/ipfs/${key}`,
-      responseType: "arraybuffer",
-    });
-    const buffer = Buffer.from(imageResponse.data, "binary");
-    const image = await sharp(buffer)
-      .resize(300, 250)
-      .withMetadata()
-      .toBuffer({ resolveWithObject: true });
+  
 
-    await uploadFile(key, image.data);
-    // const response = await fetch(`https://ipfs.io/ipfs/${key}`);
-    // const resBuffer = await response.arrayBuffer();
-    // const image = await sharp(resBuffer)
-    //   .resize(300, 250)
-    //   .withMetadata()
-    //   .toBuffer({ resolveWithObject: true });
-    // uploadFile(key, image.data);
-    // const response = fetch(`https://ipfs.io/ipfs/${key}`)
-    //   .then((res) => {
-    //     uploadFile(key, res);
-    //   })
-    //   .then((res) => {
-    //     // callback(null, res);
-    //   })
-    //   .catch((err) => {
-    //     // callback(err, null);
-    //   });
-    // var blob = await response.blob();
-    // blob = blob.toString();
-    // console.log(blob);
-    // const base64Data = blob.replace(/^data:image\/png;base64,/, "");
-    // require("fs").writeFile("out.png", base64Data, "base64", function (err) {
-    //   console.log("Hello error", err);
-    // });
-    // // const file = new File([blob], key);
-    // const result = await uploadFile(key);
-    // console.log(result);
-  } catch (error) {
-    console.error(`get: error occurred ${error}`);
-    res.send("Hello");
-  }
+    try {
+      const res = await axios({
+        url: `https://ipfs.io/ipfs/${key}`,
+        responseType: "arraybuffer",
+      });
+      const buffer = Buffer.from(res.data, "binary");
+      
+      if(type=="image"){
+        const image = await sharp(buffer)
+          .resize(300, null)
+          .withMetadata()
+          .toBuffer({ resolveWithObject: true });
+          await uploadFile(key,image.data);
+      }
+      if(type=="video"){
+         fs.writeFile(`${key}.mp4`, buffer,{encoding: 'base64'}, (err) => {
+          if(!err) console.log('Data written');
+          // ffmpeg(`./${key}.mp4`).size('200x?');
+          ffmpeg(`${key}.mp4`)
+          .output('outputfile.mp4')
+          .videoCodec('libx264')
+          .size("30%")
+          .on('end', function() {
+            console.log('Finished processing');
+          })
+          .run();
+          
 
-  res.send("Hello");
+        });
+        
+        fs.readFile('outputfile.mp4', {encoding: 'base64'} , async  (err, data) => {
+          if (err) {
+            console.error(err)
+            return
+          }
+          await uploadFile(key,data);
+        })
+        
+      }
+    } catch (error) {
+      console.error(`error occurred ${error}`);
+      res.send("Error");
+    }
+  
+
+  res.send("Success");0 
 });
 
 app.get("/getImage", (req, res) => {

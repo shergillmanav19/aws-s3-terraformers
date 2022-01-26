@@ -1,0 +1,27 @@
+ // const response = await fetch(`https://ipfs.io/ipfs/${key}`);
+    // const resBuffer = await response.arrayBuffer();
+    // const image = await sharp(resBuffer)
+    //   .resize(300, 250)
+    //   .withMetadata()
+    //   .toBuffer({ resolveWithObject: true });
+    // uploadFile(key, image.data);
+    // const response = fetch(`https://ipfs.io/ipfs/${key}`)
+    //   .then((res) => {
+    //     uploadFile(key, res);
+    //   })
+    //   .then((res) => {
+    //     // callback(null, res);
+    //   })
+    //   .catch((err) => {
+    //     // callback(err, null);
+    //   });
+    // var blob = await response.blob();
+    // blob = blob.toString();
+    // console.log(blob);
+    // const base64Data = blob.replace(/^data:image\/png;base64,/, "");
+    // require("fs").writeFile("out.png", base64Data, "base64", function (err) {
+    //   console.log("Hello error", err);
+    // });
+    // // const file = new File([blob], key);
+    // const result = await uploadFile(key);
+    // console.log(result);
