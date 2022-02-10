@@ -33,7 +33,7 @@ async function uploadtos3(key, type) {
 
     if (type == "image") {
       const image = await sharp(buffer)
-        .resize(250, null)
+        .resize(300, null)
         .withMetadata()
         .toBuffer({ resolveWithObject: true });
       await uploadFile(key, image.data, type);
@@ -58,7 +58,7 @@ async function uploadtos3(key, type) {
             inputPath: `${key}.mp4`,
             outputPath: "output.mp4",
             format: "mp4",
-            size: "250x350",
+            size: "300x412",
           });
           fs.readFile("output.mp4", async (err, data) => {
             if (!err) await uploadFile(key, data, type);
