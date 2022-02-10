@@ -39,32 +39,27 @@ async function uploadtos3(key, type) {
       await uploadFile(key, image.data, type);
     }
     if (type == "video") {
-      fs.writeFile(
-        `${key}.mp4`,
-        buffer,
-        // { encoding: "base64" },
-        async (err) => {
-          if (!err) console.log("Data written");
-          // ffmpeg(`./${key}.mp4`).size('200x?');
-          // ffmpeg(`${key}.mp4`)
-          //   .output("outputfile.mp4")
-          //   .videoCodec("h.264")
-          //   .size("30%")
-          //   .on("end", function () {
-          //     console.log("Finished processing");
-          //   })
-          //   .run();
-          await videoResize({
-            inputPath: `${key}.mp4`,
-            outputPath: "output.mp4",
-            format: "mp4",
-            size: "300x412",
-          });
-          fs.readFile("output.mp4", async (err, data) => {
-            if (!err) await uploadFile(key, data, type);
-          });
-        }
-      );
+      fs.writeFile(`${key}.mp4`, buffer, async (err) => {
+        if (!err) console.log("Data written");
+        // ffmpeg(`./${key}.mp4`).size('200x?');
+        // ffmpeg(`${key}.mp4`)
+        //   .output("outputfile.mp4")
+        //   .videoCodec("h.264")
+        //   .size("30%")
+        //   .on("end", function () {
+        //     console.log("Finished processing");
+        //   })
+        //   .run();
+        await videoResize({
+          inputPath: `${key}.mp4`,
+          outputPath: "output.mp4",
+          format: "mp4",
+          size: "300x412",
+        });
+        fs.readFile("output.mp4", async (err, data) => {
+          if (!err) await uploadFile(key, data, type);
+        });
+      });
     }
   } catch (error) {
     console.error(`error occurred ${error}`);
